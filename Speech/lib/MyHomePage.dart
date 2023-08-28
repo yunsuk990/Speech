@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:speech/screen/ListPage.dart';
 import 'FirstPage.dart';
 
 class MyHomePage extends StatefulWidget{
@@ -7,29 +8,30 @@ class MyHomePage extends StatefulWidget{
 
 }
 
-class _myHomePage extends State<MyHomePage> {
+class _myHomePage extends State<MyHomePage> with SingleTickerProviderStateMixin {
 
-  CupertinoTabBar? tabBar;
+  TabController? controller;
 
   @override
   void initState() {
     super.initState();
-    tabBar = CupertinoTabBar(items: <BottomNavigationBarItem>[
-      BottomNavigationBarItem(icon: Icon(CupertinoIcons.home)),
-      BottomNavigationBarItem(icon: Icon(CupertinoIcons.list_bullet))
-    ]);
+    controller = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoTabScaffold(tabBar: tabBar!, tabBuilder: (context, value){
-      if(value ==0){
-        return FirstPage();
-      }else{
-        return Container(
-          child: Text('tab2'),
-        );
-      }
-    });
+    return Scaffold(
+      body: TabBarView(
+          children: <Widget>[FirstPage(), ListPage()],
+          controller: controller,
+      ),
+      bottomNavigationBar:
+      Padding(
+          padding: EdgeInsets.all(20),
+          child: TabBar(tabs: [
+            Tab(icon: Icon(Icons.home, size: 30, color: Colors.blue)),
+            Tab(icon: Icon(Icons.list, size: 30,color: Colors.blue)),
+          ], controller: controller,))
+    );
   }
 }
