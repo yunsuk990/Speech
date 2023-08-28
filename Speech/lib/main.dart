@@ -1,4 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:speech/FirstPage.dart';
+import 'package:speech/screen/MemoPage.dart';
+import 'package:speech/screen/folderPage.dart';
 import 'MyHomePage.dart';
 
 void main() {
@@ -8,9 +11,13 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
+    return MaterialApp(
       title: 'Flutter Demo',
-      home: MyHomePage()
+      home: MyHomePage(),
+      routes: {
+        '/folder':(context) => FolderPage(),
+        '/memo': (context) => MemoPage()
+      }
     );
   }
 }
