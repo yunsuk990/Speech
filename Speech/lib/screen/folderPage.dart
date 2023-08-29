@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 
 class FolderPage extends StatefulWidget {
+  final Future<Database> database;
+  FolderPage(this.database);
+
   @override
   State<FolderPage> createState() => _FolderPageState();
 }
