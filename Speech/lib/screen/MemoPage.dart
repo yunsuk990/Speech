@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common/sqlite_api.dart';
+
+import '../modal/Memo.dart';
 
 class MemoPage extends StatefulWidget {
+  final Future<Database> database;
+
+  MemoPage(this.database);
+
   @override
   State<MemoPage> createState() => _MemoPageState();
 }
@@ -26,6 +33,7 @@ class _MemoPageState extends State<MemoPage> {
         actions: [
           TextButton(onPressed: (){
             print(controller!.value.text);
+
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -52,5 +60,46 @@ class _MemoPageState extends State<MemoPage> {
         ),
       ),
     );
+  }
+
+  void insertMemo(Memo memo) async {
+    final Database database = await widget.database!;
+    await database
+        .insert('memo', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace).then((value){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
+    });
+  }
+
+  Future<List<Folder>> getFolderList() async {
+    final Database database = await widget.database!;
+    final List<Map<String, dynamic>> maps = await database.query('folder');
+    return List.generate(maps.length, (index){
+      return Folder(maps[index]['name'], FocusNode(), TextEditingController(text: maps[index]['name']), DateTime.now().toIso8601String());
+    });
+  }
+
+  void deleteFolder(Folder folder) async {
+    final Database database = await widget.database!;
+    await database.delete('folder',
+        where: 'name=?', whereArgs: [folder.name]).then((value){
+      setState(() {
+        list = getFolderList();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('폴더를 삭제하였습니다.')));
+    });
+  }
+
+  void updateFolder(Folder folder, String name) async {
+    final Database database = await widget.database;
+    await database.update('folder',
+        {
+          'name' : name,
+          'dateTime' : folder.dateTime
+        },
+        where: 'name = ?', whereArgs: [folder.name]).then((value){
+      setState(() {
+        list = getFolderList();
+      });
+    });
   }
 }
