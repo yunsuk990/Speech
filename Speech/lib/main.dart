@@ -17,8 +17,11 @@ class MyApp extends StatelessWidget {
       join(await getDatabasesPath(), 'speech_database_db'),
       onCreate: (db, version){
         return db.execute(
-            'CREATE TABLE folder(id INTEGER PRIMARY KEY AUTOINCREMENT,'
-                'name TEXT, dateTime TEXT)'
+            'CREATE TABLE '
+                'folder(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, dateTime TEXT'), '
+                'memo(id INTEGER PRIMARY KEY AUTOINCREMENT,'
+                'folderName TEXT, content TEXT, dateTime TEXT)',
+
         );
       },
       version: 1
@@ -33,7 +36,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/':(context) => MyHomePage(database),
         '/folder':(context) => FolderPage(database),
-        '/memo': (context) => MemoPage()
+        '/memo': (context) => MemoPage(database)
       }
     );
   }
