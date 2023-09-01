@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
+import '../modal/Folder.dart';
 import '../modal/Memo.dart';
 
 class MemoPage extends StatefulWidget {
@@ -13,13 +15,12 @@ class MemoPage extends StatefulWidget {
 }
 
 class _MemoPageState extends State<MemoPage> {
-
   TextEditingController? controller;
 
   @override
   void initState() {
-    super.initState();
     controller = TextEditingController();
+    super.initState();
   }
 
   @override
@@ -27,13 +28,16 @@ class _MemoPageState extends State<MemoPage> {
     Size size = MediaQuery.of(context).size;
     double width = size.width;
     double height = size.height;
+    String folderName = ModalRoute.of(context)!.settings.arguments as String;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("메모"),
         actions: [
           TextButton(onPressed: (){
             print(controller!.value.text);
-
+            Memo memo = Memo(null, folderName, controller?.value.text.toString(), DateTime.now().toIso8601String());
+            insertMemo(memo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -45,16 +49,16 @@ class _MemoPageState extends State<MemoPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.all(10),
-                child: TextField(
+                  padding: EdgeInsets.all(10),
+                  child: TextField(
                   controller: controller,
                   decoration: InputDecoration(hintText: "Insert your message",),
                   scrollPadding: EdgeInsets.all(20.0),
                   keyboardType: TextInputType.multiline,
                   maxLines: 99999,
                   autofocus: true,
-
-                  style: TextStyle(fontSize: 18, color: Colors.black),))
+                  style: TextStyle(fontSize: 18, color: Colors.black),)
+              )
             ],
           ),
         ),
@@ -70,36 +74,18 @@ class _MemoPageState extends State<MemoPage> {
     });
   }
 
-  Future<List<Folder>> getFolderList() async {
-    final Database database = await widget.database!;
-    final List<Map<String, dynamic>> maps = await database.query('folder');
-    return List.generate(maps.length, (index){
-      return Folder(maps[index]['name'], FocusNode(), TextEditingController(text: maps[index]['name']), DateTime.now().toIso8601String());
-    });
-  }
-
-  void deleteFolder(Folder folder) async {
-    final Database database = await widget.database!;
-    await database.delete('folder',
-        where: 'name=?', whereArgs: [folder.name]).then((value){
-      setState(() {
-        list = getFolderList();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('폴더를 삭제하였습니다.')));
-    });
-  }
-
-  void updateFolder(Folder folder, String name) async {
-    final Database database = await widget.database;
-    await database.update('folder',
-        {
-          'name' : name,
-          'dateTime' : folder.dateTime
-        },
-        where: 'name = ?', whereArgs: [folder.name]).then((value){
-      setState(() {
-        list = getFolderList();
-      });
-    });
-  }
+  // void updateMemo(Memo memo, String name) async {
+  //   final Database database = await widget.database;
+  //   await database.update('memo',
+  //       {
+  //         'folderName' : memo.folderName,
+  //         'content' : memo.content,
+  //         'dateTime' : memo.folderName
+  //       },
+  //       where: 'id = ?', whereArgs: [memo.id]).then((value){
+  //     setState(() {
+  //       memoList = getMemoList();
+  //     });
+  //   });
+  // }
 }
