@@ -16,16 +16,19 @@ class MyApp extends StatelessWidget {
     return openDatabase(
       join(await getDatabasesPath(), 'speech_database_db'),
       onCreate: (db, version){
-        return db.execute(
-            'CREATE TABLE '
-                'folder(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, dateTime TEXT'), '
-                'memo(id INTEGER PRIMARY KEY AUTOINCREMENT,'
-                'folderName TEXT, content TEXT, dateTime TEXT)',
-
-        );
+        db.execute('CREATE TABLE '
+                'folder(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, dateTime TEXT');
       },
-      version: 1
+        onUpgrade: _onUpgrade ,
+        version: 4
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < newVersion) {
+      db.execute('CREATE TABLE '
+          'memo(id INTEGER PRIMARY KEY AUTOINCREMENT, folderName TEXT, content TEXT, dateTime TEXT)',);
+    }
   }
 
   @override
