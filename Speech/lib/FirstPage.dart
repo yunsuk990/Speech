@@ -56,16 +56,16 @@ class _firstPage extends State<FirstPage>{
                   if(index == 0){
                     if(items.contains('무제폴더')){
                       FocusNode focusNode = FocusNode();
-                      insertTour(Folder("무제폴더1",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
+                      insertFolder(Folder("무제폴더1",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
                       FocusScope.of(context).requestFocus(focusNode);
                     }else{
                       FocusNode focusNode = FocusNode();
-                      insertTour(Folder("무제폴더",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
+                      insertFolder(Folder("무제폴더",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
                       FocusScope.of(context).requestFocus(focusNode);
                     }
                   }else{
                     FocusNode focusNode = FocusNode();
-                    insertTour(Folder("무제폴더${index}",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
+                    insertFolder(Folder("무제폴더${index}",focusNode, TextEditingController(text: "무제폴더${index}"), DateTime.now().toIso8601String()));
                     WidgetsBinding.instance.addPostFrameCallback((_){
                       FocusScope.of(context).requestFocus(focusNode);
                     });
@@ -118,6 +118,7 @@ class _firstPage extends State<FirstPage>{
                                                           isDestructiveAction: true,
                                                           onPressed: () { setState(() {
                                                             deleteFolder(folderList[index]);
+                                                            deleteMemos(folderList[index]);
                                                             Navigator.of(context).pop();
                                                           });},
                                                           trailingIcon: CupertinoIcons.delete,),
@@ -153,7 +154,9 @@ class _firstPage extends State<FirstPage>{
                                             }
                                         );
                                       }else{
-                                        return Text('No Data');
+                                        return Center(
+                                          child: Text('No Data'),
+                                        );
                                       }
                                   }
                                 },
@@ -174,7 +177,7 @@ class _firstPage extends State<FirstPage>{
     );
   }
 
-  void insertTour(Folder folder) async {
+  void insertFolder(Folder folder) async {
     final Database database = await widget.database!;
     await database
         .insert('folder', folder.toMap(), conflictAlgorithm: ConflictAlgorithm.fail).then((value){
@@ -195,12 +198,22 @@ class _firstPage extends State<FirstPage>{
 
   void deleteFolder(Folder folder) async {
     final Database database = await widget.database!;
+    await database.delete('memo',
+        where: 'folderName=?', whereArgs: [folder.name]).then((value){
+      setState(() {
+        list = getFolderList();
+      });
+    });
+  }
+
+  void deleteMemos(Folder folder) async {
+    final Database database = await widget.database!;
     await database.delete('folder',
         where: 'name=?', whereArgs: [folder.name]).then((value){
-          setState(() {
-            list = getFolderList();
-          });
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('폴더를 삭제하였습니다.')));
+      setState(() {
+        list = getFolderList();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('폴더를 삭제하였습니다.')));
     });
   }
 
