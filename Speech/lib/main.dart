@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:speech/FirstPage.dart';
 import 'package:speech/screen/MemoPage.dart';
+import 'package:speech/screen/UpdateMemo.dart';
 import 'package:speech/screen/folderPage.dart';
 import 'MyHomePage.dart';
 import 'package:sqflite/sqflite.dart';
@@ -20,14 +21,22 @@ class MyApp extends StatelessWidget {
                 'folder(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, dateTime TEXT');
       },
         onUpgrade: _onUpgrade ,
-        version: 4
+        version: 17
     );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < newVersion) {
-      db.execute('CREATE TABLE '
-          'memo(id INTEGER PRIMARY KEY AUTOINCREMENT, folderName TEXT, content TEXT, dateTime TEXT)',);
+      // db.execute('CREATE TABLE '
+      //     'folder(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, dateTime TEXT)');
+
+      // db.execute('CREATE TABLE '
+      //     'memo(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT ,folderName TEXT, content TEXT, dateTime TEXT)',);
+
+      // db.execute('ALTER TABLE memo '
+      //     'ADD COLUMN title TEXT');
+
+
     }
   }
 
@@ -39,7 +48,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/':(context) => MyHomePage(database),
         '/folder':(context) => FolderPage(database),
-        '/memo': (context) => MemoPage(database)
+        '/memo': (context) => MemoPage(database),
+        '/memoUpdate': (context) => UpdateMemoPage(database)
       }
     );
   }
