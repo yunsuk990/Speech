@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../modal/Folder.dart';
@@ -16,9 +17,11 @@ class MemoPage extends StatefulWidget {
 
 class _MemoPageState extends State<MemoPage> {
   TextEditingController? controller;
+  TextEditingController? titleController;
 
   @override
   void initState() {
+    titleController = TextEditingController();
     controller = TextEditingController();
     super.initState();
   }
@@ -36,7 +39,9 @@ class _MemoPageState extends State<MemoPage> {
         actions: [
           TextButton(onPressed: (){
             print(controller!.value.text);
-            Memo memo = Memo(null, folderName, controller?.value.text.toString(), DateTime.now().toIso8601String());
+            DateTime now = DateTime.now();
+            String currentTime = DateFormat('yyyy-MM-dd').format(now);
+            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, controller?.value.text.toString(), currentTime);
             insertMemo(memo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
@@ -50,14 +55,30 @@ class _MemoPageState extends State<MemoPage> {
             children: <Widget>[
               Padding(
                   padding: EdgeInsets.all(10),
-                  child: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(hintText: "Insert your message",),
-                  scrollPadding: EdgeInsets.all(20.0),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 99999,
-                  autofocus: true,
-                  style: TextStyle(fontSize: 18, color: Colors.black),)
+                  child: Column(
+                    children: <Widget>[
+
+                        TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(hintText: 'Title'),
+                          scrollPadding: EdgeInsets.all(20),
+                          keyboardType: TextInputType.text,
+                          maxLines: 1,
+                          autofocus: true,
+                          style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold)
+                        ),
+
+                        TextField(
+                            controller: controller,
+                            decoration: InputDecoration(hintText: "Insert your message",),
+                            scrollPadding: EdgeInsets.all(20.0),
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 99999,
+                            autofocus: true,
+                            style: TextStyle(fontSize: 18, color: Colors.black)
+                        )
+                    ],
+                  )
               )
             ],
           ),
