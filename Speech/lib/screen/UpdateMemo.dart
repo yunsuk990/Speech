@@ -1,28 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../modal/Memo.dart';
 
-class MemoPage extends StatefulWidget {
+class UpdateMemoPage extends StatefulWidget {
   final Future<Database> database;
 
-  MemoPage(this.database);
+  UpdateMemoPage(this.database);
 
   @override
-  State<MemoPage> createState() => _MemoPageState();
+  State<UpdateMemoPage> createState() => _UpdateMemoPage();
 }
 
-class _MemoPageState extends State<MemoPage> {
-
-  late Future<Memo> memo;
+class _UpdateMemoPage extends State<UpdateMemoPage> {
 
   TextEditingController? controller;
+  TextEditingController? titleController;
+  late Memo memo;
 
   @override
   void initState() {
     super.initState();
-    memo = getMemo();
   }
 
   @override
@@ -30,7 +29,9 @@ class _MemoPageState extends State<MemoPage> {
     Size size = MediaQuery.of(context).size;
     double width = size.width;
     double height = size.height;
-    String folderName = ModalRoute.of(context)!.settings.arguments as String;
+    memo = ModalRoute.of(context)!.settings.arguments as Memo;
+    titleController = TextEditingController(text: memo.title);
+    controller = TextEditingController(text: memo.content);
 
     return Scaffold(
       appBar: AppBar(
@@ -38,8 +39,10 @@ class _MemoPageState extends State<MemoPage> {
         actions: [
           TextButton(onPressed: (){
             print(controller!.value.text);
-            Memo memo = Memo(null, folderName, controller?.value.text.toString(), DateTime.now().toIso8601String());
-            insertMemo(memo);
+            DateTime now = DateTime.now();
+            String currentTime = DateFormat('yyyy-MM-dd').format(now);
+            Memo updateMemo = Memo(memo.id, titleController!.value.text ,memo.folderName, controller?.value.text.toString(), currentTime);
+            insertMemo(updateMemo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -50,40 +53,45 @@ class _MemoPageState extends State<MemoPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              FutureBuilder(builder: (context, snapshot){
-                controller = TextEditingController(text: snapshot.data?.content);
-                switch(snapshot.connectionState){
-                  case ConnectionState.none:
-                    return CupertinoActivityIndicator();
-                  case ConnectionState.waiting:
-                    return CupertinoActivityIndicator();
-                  case ConnectionState.active:
-                    return CupertinoActivityIndicator();
-                  case ConnectionState.done:
-                    return Padding(
+                    Padding(
                         padding: EdgeInsets.all(10),
-                        child: TextField(
-                          controller: controller,
-                          decoration: InputDecoration(hintText: "Insert your message",),
-                          scrollPadding: EdgeInsets.all(20.0),
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 99999,
-                          autofocus: true,
-                          style: TextStyle(fontSize: 18, color: Colors.black),));
-                }
-              }
-                ,future: memo,)
-            ],
+                        child:
+                          Column(
+                              children: <Widget>[
+                              TextField(
+                              controller: titleController,
+                              decoration: InputDecoration(hintText: 'Title'),
+                              scrollPadding: EdgeInsets.all(20),
+                              keyboardType: TextInputType.text,
+                              maxLines: 1,
+                              autofocus: true,
+                              style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold)
+                          ),
+
+                          Padding(
+                              padding: EdgeInsets.all(10),
+                              child: TextField(
+                                controller: controller,
+                                decoration: InputDecoration(hintText: "Insert your message",),
+                                scrollPadding: EdgeInsets.all(20.0),
+                                keyboardType: TextInputType.multiline,
+                                maxLines: 99999,
+                                autofocus: true,
+                                style: TextStyle(fontSize: 18, color: Colors.black),)
+                          )
+                        ])
+                    )
+              ]
+            )
           ),
         ),
-      ),
-    );
+      );
   }
 
   void insertMemo(Memo memo) async {
     final Database database = await widget.database!;
     await database
-        .insert('memo', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace).then((value){
+        .update('memo', memo.toMap(), where: 'id=?', whereArgs: [memo.id]).then((value){
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
     });
   }
@@ -91,7 +99,7 @@ class _MemoPageState extends State<MemoPage> {
   Future<Memo> getMemo() async {
     final Database database = await widget.database!;
     final List<Map<String, dynamic>> maps = await database.query('memo');
-    return Memo(maps[0]['id'], maps[0]['folderName'], maps[0]['content'], maps[0]['dateTime']);
+    return Memo(maps[0]['id'],maps[0]['title'], maps[0]['folderName'], maps[0]['content'], maps[0]['dateTime']);
   }
 
 // void updateMemo(Memo memo, String name) async {
