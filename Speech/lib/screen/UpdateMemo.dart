@@ -18,9 +18,11 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
   TextEditingController? controller;
   TextEditingController? titleController;
   late Memo memo;
+  List<String> items = List.empty(growable: true);
 
   @override
   void initState() {
+    items.add('asdfsaf');
     super.initState();
   }
 
@@ -53,34 +55,85 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-                    Padding(
-                        padding: EdgeInsets.all(10),
-                        child:
+                    Container(
+                      width: width,
+                      height: height*0.78,
+                      child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child:
                           Column(
                               children: <Widget>[
-                              TextField(
-                              controller: titleController,
-                              decoration: InputDecoration(hintText: 'Title'),
-                              scrollPadding: EdgeInsets.all(20),
-                              keyboardType: TextInputType.text,
-                              maxLines: 1,
-                              autofocus: true,
-                              style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold)
-                          ),
+                                TextField(
+                                    controller: titleController,
+                                    decoration: InputDecoration(hintText: 'Title'),
+                                    scrollPadding: EdgeInsets.all(20),
+                                    keyboardType: TextInputType.text,
+                                    maxLines: 1,
+                                    autofocus: true,
+                                    style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold)
+                                ),
 
-                          Padding(
-                              padding: EdgeInsets.all(10),
-                              child: TextField(
-                                controller: controller,
-                                decoration: InputDecoration(hintText: "Insert your message",),
-                                scrollPadding: EdgeInsets.all(20.0),
-                                keyboardType: TextInputType.multiline,
-                                maxLines: 99999,
-                                autofocus: true,
-                                style: TextStyle(fontSize: 18, color: Colors.black),)
-                          )
-                        ])
-                    )
+                                CupertinoButton(child: Text('면접 질문 추가'), padding: EdgeInsets.only(top: 80), onPressed: () {
+                                  setState(() {
+                                    items.add('asdfasdfasfasdf');
+                                  });
+                                }),
+
+
+                                SingleChildScrollView(
+                                  child: Container(
+                                    width: width,
+                                    height: height*0.5,
+
+                                    child: ListView.builder(itemCount: items.length ,itemBuilder: (BuildContext context, int index) {
+                                      return Container(
+                                        child: Text('${items[index]}'),
+                                      );
+                                    }),
+                                  )
+                                )
+
+
+                                // Padding(
+                                //     padding: EdgeInsets.all(10),
+                                //     child: TextField(
+                                //       controller: controller,
+                                //       decoration: InputDecoration(hintText: "Insert your message",),
+                                //       scrollPadding: EdgeInsets.all(20.0),
+                                //       keyboardType: TextInputType.multiline,
+                                //       maxLines: 29,
+                                //       autofocus: true,
+                                //       style: TextStyle(fontSize: 18, color: Colors.black),)
+                                // )
+                          ]
+                        ),
+                      ),
+                    ),
+
+                    Padding(padding: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                      child: Row(
+                        children: <Widget>[
+                          MaterialButton(onPressed: (){},
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(20))
+                            ),
+                            color: Colors.lightBlue,
+                            padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
+                            child: Text('면접 시작하기',style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),),
+
+                          Expanded(child: Container()),
+
+                          MaterialButton(onPressed: (){},
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(20))
+                              ),
+                              color: Colors.grey,
+                              padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
+                              child: Text('면접 설정하기', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)
+
+                          ),
+                        ],
+                      ),)
               ]
             )
           ),
