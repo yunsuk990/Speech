@@ -79,7 +79,33 @@ class _MemoPageState extends State<MemoPage> {
                         )
                     ],
                   )
-              )
+              ),
+
+              Padding(padding: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                child: Row(
+                  children: <Widget>[
+                    MaterialButton(onPressed: (){},
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))
+                      ),
+                      color: Colors.lightBlue,
+                      padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
+                      child: Text('면접 시작하기',style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),),
+
+                    Expanded(child: Container()),
+
+                    MaterialButton(onPressed: (){},
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20))
+                        ),
+                        color: Colors.grey,
+                        padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
+                        child: Text('면접 설정하기', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)
+
+                    ),
+                  ],
+                ),)
+
             ],
           ),
         ),
