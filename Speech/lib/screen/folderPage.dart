@@ -33,9 +33,13 @@ class _FolderPageState extends State<FolderPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(folderName),
+
         leadingWidth: 120,
         leading: Row(children: <Widget>[
-            BackButton(),
+            IconButton(onPressed: (){
+              Navigator.of(context).pop();
+            }, icon: Icon(CupertinoIcons.back),
+                constraints: BoxConstraints()),
             Text('폴더', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
           ]),
         actions: <Widget>[
@@ -51,58 +55,65 @@ class _FolderPageState extends State<FolderPage> {
 
       body: Container(
         child: Center(
-          child: FutureBuilder(
-            builder: (context, snapshot){
-              switch(snapshot.connectionState){
-                case ConnectionState.none:
-                  return CupertinoActivityIndicator();
-                case ConnectionState.waiting:
-                  return CupertinoActivityIndicator();
-                case ConnectionState.active:
-                  return CupertinoActivityIndicator();
-                case ConnectionState.done:
-                  if(snapshot.hasData){
-                    return ListView.builder(
-                        itemCount: (snapshot.data! as List<Memo>).length,
-                        padding: EdgeInsets.only(bottom: 80),
-                        itemBuilder: (BuildContext context, int index) {
-                          List<Memo> folderList = snapshot.data as List<Memo>;
-                          return Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(15)),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: ListTile(
-                                leading: Text('${folderList[index].title}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                title:Text(folderList[index].content.toString(), style: TextStyle(fontWeight: FontWeight.w300), maxLines: 1,),
-                                trailing: Text('${folderList[index].dateTime}'),
-                                onTap: (){
-                                  Navigator.of(context).pushNamed('/memoUpdate', arguments: folderList[index]).then((value){
-                                    setState(() {
-                                      memoList = getMemoList(folderName);
-                                    });
-                                  });
-                                },
-                                onLongPress: (){
-                                  deleteMemo(folderList[index], folderList[index].folderName);
-                                },
-                              ),
-                            )
-
+          child: Column(
+            children: <Widget>[
+              Container(
+                width: width,
+                height: height*0.83,
+                child: FutureBuilder(
+                  builder: (context, snapshot){
+                    switch(snapshot.connectionState){
+                      case ConnectionState.none:
+                        return CupertinoActivityIndicator();
+                      case ConnectionState.waiting:
+                        return CupertinoActivityIndicator();
+                      case ConnectionState.active:
+                        return CupertinoActivityIndicator();
+                      case ConnectionState.done:
+                        if(snapshot.hasData){
+                          return ListView.builder(
+                              itemCount: (snapshot.data! as List<Memo>).length,
+                              padding: EdgeInsets.only(top: 10),
+                              itemBuilder: (BuildContext context, int index) {
+                                List<Memo> folderList = snapshot.data as List<Memo>;
+                                return Card(
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: ListTile(
+                                        leading: Text('${folderList[index].title}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                                        title:Text(folderList[index].content.toString(), style: TextStyle(fontWeight: FontWeight.w300), maxLines: 1,),
+                                        trailing: Text('${folderList[index].dateTime}'),
+                                        onTap: (){
+                                          Navigator.of(context).pushNamed('/memoUpdate', arguments: folderList[index]).then((value){
+                                            setState(() {
+                                              memoList = getMemoList(folderName);
+                                            });
+                                          });
+                                        },
+                                        onLongPress: (){
+                                          deleteMemo(folderList[index], folderList[index].folderName);
+                                        },
+                                      ),
+                                    )
+                                );
+                              }
                           );
+                        }else{
+                          return Text('No Data');
                         }
-                    );
-                  }else{
-                    return Text('No Data');
-                  }
-              }
-            },
-            future: memoList,
-          ),
+                    }
+                  },
+                  future: memoList,
+                ),
+              ),
+            ],
+          )
         ),
-      )
+      ),
     );
   }
 
@@ -127,11 +138,4 @@ class _FolderPageState extends State<FolderPage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 삭제하였습니다.')));
     });
   }
-}
-
-class Argument{
-  String folderName;
-  String id;
-
-  Argument(this.folderName, this.id);
 }
