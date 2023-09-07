@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:intl/intl.dart';
 import '../modal/Memo.dart';
+import '../modal/Speech.dart';
 
 class FolderPage extends StatefulWidget {
   final Future<Database> database;
@@ -124,6 +125,12 @@ class _FolderPageState extends State<FolderPage> {
     );
 
     return List.generate(maps.length, (index){
+      // List<Speech> speech = maps[index]['content'];
+      // for(int i=0; i<speech.length; i++){
+      //   speech[i].titleController = TextEditingController(text: speech[i].title);
+      //   speech[i].contentController = TextEditingController(text: speech[i].content);
+      // }
+
       return Memo(maps[index]['id'],maps[index]['title'],maps[index]['folderName'], maps[index]['content'], maps[index]['dateTime']);
     });
   }
