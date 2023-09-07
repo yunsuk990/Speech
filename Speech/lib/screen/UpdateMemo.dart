@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:speech/modal/Speech.dart';
 import 'package:sqflite/sqflite.dart';
 import '../modal/Memo.dart';
 
@@ -18,7 +19,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
   TextEditingController? controller;
   TextEditingController? titleController;
   late Memo memo;
-  List<String> items = List.empty(growable: true);
+  late List<Speech>? speech;
 
   @override
   void initState() {
@@ -31,8 +32,9 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
     double width = size.width;
     double height = size.height;
     memo = ModalRoute.of(context)!.settings.arguments as Memo;
-    titleController = TextEditingController(text: memo.title);
-    controller = TextEditingController(text: memo.content);
+    speech = memo.content;
+    titleController = TextEditingController();
+    controller = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -42,8 +44,8 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
             print(controller!.value.text);
             DateTime now = DateTime.now();
             String currentTime = DateFormat('yyyy-MM-dd').format(now);
-            Memo updateMemo = Memo(memo.id, titleController!.value.text ,memo.folderName, controller?.value.text.toString(), currentTime);
-            insertMemo(updateMemo);
+            Memo updatememo = Memo(memo.id, titleController!.value.text ,memo.folderName, memo.content, currentTime);
+            updateMemo(updatememo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -77,30 +79,8 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                     ),
     
                                     CupertinoButton(child: Text('면접 질문 추가'),color: Colors.lightBlue,padding: EdgeInsets.only(left: width/3, right: width/3),onPressed: () {
-                                      // showCupertinoDialog(context: context, builder: (BuildContext context){
-                                      //   return CupertinoAlertDialog(
-                                      //     title: Text('면접 질문 추가',),
-                                      //     content: Padding(
-                                      //       padding: EdgeInsets.only(top: 20),
-                                      //       child: CupertinoTextField(
-                                      //         padding: EdgeInsets.only(left: 50, right: 20),
-                                      //         decoration: BoxDecoration(
-                                      //           borderRadius: BorderRadius.circular(8),
-                                      //           color: Colors.white
-                                      //         ),
-                                      //
-                                      //       ),
-                                      //     ),
-                                      //     actions: <Widget>[
-                                      //       CupertinoButton(child: Text('등록'), onPressed: (){}),
-                                      //       CupertinoButton(child: Text('취소'), onPressed: (){
-                                      //         Navigator.of(context).pop();
-                                      //       }),
-                                      //     ],
-                                      //   );
-                                      // });
                                       setState(() {
-                                        items.add("면접 질문 입력하세요");
+                                        speech?.add(Speech(null, null, TextEditingController(), TextEditingController()));
                                       });
                                     }),
     
@@ -121,94 +101,33 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                                     borderRadius: BorderRadius.all(Radius.circular(15)),
                                                   ),
                                                   elevation: 3,
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(5),
-                                                    child: CupertinoTextField(
-                                                      decoration: BoxDecoration(\
-                                                          border: InputBorder.none
-                                                      ),
-                                                      placeholder: "면접 질문을 작성해주세요.",
-                                                      controller: TextEditingController(),
-                                                      autofocus: true,
-                                                    ),
-                                                  )
+                                                  child: CupertinoTextField(
+                                                    decoration: BoxDecoration(),
+                                                    padding: EdgeInsets.only(top: 20, left: 5, bottom: 15, right: 5),
+                                                    placeholder: "면접 질문을 작성해주세요.",
+                                                    controller: speech?[index].titleController,
+                                                    autofocus: true,
+                                                    keyboardType: TextInputType.multiline,
+                                                    prefix: Padding(padding: EdgeInsets.only(left: 10), child: Icon(CupertinoIcons.checkmark_alt),),
+                                                  ),
                                               ),
+                                              SizedBox(height: 10),
                                               CupertinoTextField(
                                                 decoration: BoxDecoration(
                                                   border: Border.all(color: Colors.black),
                                                   borderRadius: BorderRadius.all(Radius.circular(10)),
                                                 ),
-                                                padding: EdgeInsets.all(10),
-                                                placeholder: '질문에 대한 답을 작성해주세요.'
-
-
+                                                padding: EdgeInsets.only(top: 10, left: 15, bottom: 10),
+                                                keyboardType: TextInputType.multiline,
+                                                placeholder: '질문에 대한 답을 작성해주세요.',
+                                                maxLines: 6,
+                                                controller: speech?[index].contentController,
                                               ),
                                             ],
                                           );
 
-                                        },itemCount: items.length, separatorBuilder: (BuildContext context, int index) { return Divider(); },),
+                                        },itemCount: speech!.length, separatorBuilder: (BuildContext context, int index) { return Divider(); },),
                                     ),
-    
-                                    // Column(
-                                    //   children: <Widget>[
-                                        // ...items.map((e) => Column(
-                                        //   children: <Widget>[
-                                        //         Card(
-                                        //             color: Colors.white60,
-                                        //             shape: RoundedRectangleBorder(
-                                        //               borderRadius: BorderRadius.all(Radius.circular(15)),
-                                        //             ),
-                                        //             elevation: 3,
-                                        //             child: Padding(
-                                        //               padding: EdgeInsets.all(5),
-                                        //               child: TextField(
-                                        //                 decoration: InputDecoration(
-                                        //                     hintText: e.toString(),
-                                        //                     border: InputBorder.none
-                                        //                 ),
-                                        //                 controller: TextEditingController(),
-                                        //                 autofocus: true,
-                                        //               ),
-                                        //             )
-                                        //         ),
-                                        //         TextField(
-                                        //           decoration: InputDecoration(
-                                        //               hintText: "질문에 대한 답을 작성해주세요."
-                                        //           ),
-                                        //           maxLines: 10,
-                                        //         )
-                                        //
-                                        //   ],
-                                        // ))
-                                    //   ],
-                                    // ),
-    
-    
-                                    // SingleChildScrollView(
-                                    //   child: Container(
-                                    //     width: width,
-                                    //     height: height*0.5,
-                                    //
-                                    //     child: ListView.builder(itemCount: items.length ,itemBuilder: (BuildContext context, int index) {
-                                    //       return Container(
-                                    //         child: Text('${items[index]}'),
-                                    //       );
-                                    //     }),
-                                    //   )
-                                    // )
-    
-    
-                                    // Padding(
-                                    //     padding: EdgeInsets.all(10),
-                                    //     child: TextField(
-                                    //       controller: controller,
-                                    //       decoration: InputDecoration(hintText: "Insert your message",),
-                                    //       scrollPadding: EdgeInsets.all(20.0),
-                                    //       keyboardType: TextInputType.multiline,
-                                    //       maxLines: 29,
-                                    //       autofocus: true,
-                                    //       style: TextStyle(fontSize: 18, color: Colors.black),)
-                                    // )
                               ]
                             ),
                           ),
@@ -244,32 +163,32 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
       );
   }
 
-  void insertMemo(Memo memo) async {
+  void updateMemo(Memo memo) async {
     final Database database = await widget.database!;
     await database
         .update('memo', memo.toMap(), where: 'id=?', whereArgs: [memo.id]).then((value){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 수정하였습니다.')));
     });
   }
 
-  Future<Memo> getMemo() async {
-    final Database database = await widget.database!;
-    final List<Map<String, dynamic>> maps = await database.query('memo');
-    return Memo(maps[0]['id'],maps[0]['title'], maps[0]['folderName'], maps[0]['content'], maps[0]['dateTime']);
-  }
+  // Future<Memo> getMemo() async {
+  //   final Database database = await widget.database!;
+  //   final List<Map<String, dynamic>> maps = await database.query('memo');
+  //   return Memo(maps[0]['id'],maps[0]['title'], maps[0]['folderName'], maps[0]['content'], maps[0]['dateTime']);
+  // }
 
-// void updateMemo(Memo memo, String name) async {
-//   final Database database = await widget.database;
-//   await database.update('memo',
-//       {
-//         'folderName' : memo.folderName,
-//         'content' : memo.content,
-//         'dateTime' : memo.folderName
-//       },
-//       where: 'id = ?', whereArgs: [memo.id]).then((value){
-//     setState(() {
-//       memoList = getMemoList();
-//     });
-//   });
-// }
+  // void updateMemo(Memo memo, String name) async {
+  //   final Database database = await widget.database;
+  //   await database.update('memo',
+  //       {
+  //         'folderName' : memo.folderName,
+  //         'content' : memo.content,
+  //         'dateTime' : memo.folderName
+  //       },
+  //       where: 'id = ?', whereArgs: [memo.id]).then((value){
+  //     setState(() {
+  //       memoList = getMemoList();
+  //     });
+  //   });
+  // }
 }
