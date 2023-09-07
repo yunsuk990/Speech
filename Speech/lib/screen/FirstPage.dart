@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
-import 'modal/Folder.dart';
+import '../modal/Folder.dart';
 
 class FirstPage extends StatefulWidget{
   final Future<Database> database;
