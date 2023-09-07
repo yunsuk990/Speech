@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech/screen/ListPage.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'FirstPage.dart';
+import 'screen/FirstPage.dart';
 
 class MyHomePage extends StatefulWidget{
   final Future<Database> database;
