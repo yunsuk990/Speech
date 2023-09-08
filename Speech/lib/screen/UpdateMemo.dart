@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,9 +7,10 @@ import 'package:sqflite/sqflite.dart';
 import '../modal/Memo.dart';
 
 class UpdateMemoPage extends StatefulWidget {
-  final Future<Database> database;
-
-  UpdateMemoPage(this.database);
+  // final Future<Database> database;
+  FirebaseDatabase? _database;
+  DatabaseReference? reference;
+  UpdateMemoPage(this._database, this.reference);
 
   @override
   State<UpdateMemoPage> createState() => _UpdateMemoPage();
@@ -19,7 +21,9 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
   TextEditingController? controller;
   TextEditingController? titleController;
   late Memo memo;
-  late List<Speech>? speech;
+  late Map<String, String>? speech;
+  List<String?>? speechTitle = List.empty(growable: true);
+  List<String?>? speechContent = List.empty(growable: true);
 
   @override
   void initState() {
@@ -32,7 +36,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
     double width = size.width;
     double height = size.height;
     memo = ModalRoute.of(context)!.settings.arguments as Memo;
-    speech = memo.content;
+    speech = {};
     titleController = TextEditingController();
     controller = TextEditingController();
 
@@ -44,8 +48,8 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
             print(controller!.value.text);
             DateTime now = DateTime.now();
             String currentTime = DateFormat('yyyy-MM-dd').format(now);
-            Memo updatememo = Memo(memo.id, titleController!.value.text ,memo.folderName, memo.content, currentTime);
-            updateMemo(updatememo);
+            Memo updatememo = Memo(memo.id, titleController!.value.text ,memo.folderName, memo.speechTitle, memo.speechContent, currentTime);
+            // updateMemo(updatememo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -80,7 +84,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
     
                                     CupertinoButton(child: Text('면접 질문 추가'),color: Colors.lightBlue,padding: EdgeInsets.only(left: width/3, right: width/3),onPressed: () {
                                       setState(() {
-                                        speech?.add(Speech(null, null, TextEditingController(), TextEditingController()));
+                                        // speech?.add(Speech(null, null, TextEditingController(), TextEditingController()));
                                       });
                                     }),
     
@@ -105,7 +109,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                                     decoration: BoxDecoration(),
                                                     padding: EdgeInsets.only(top: 20, left: 5, bottom: 15, right: 5),
                                                     placeholder: "면접 질문을 작성해주세요.",
-                                                    controller: speech?[index].titleController,
+                                                    controller: TextEditingController(),
                                                     autofocus: true,
                                                     keyboardType: TextInputType.multiline,
                                                     prefix: Padding(padding: EdgeInsets.only(left: 10), child: Icon(CupertinoIcons.checkmark_alt),),
@@ -121,7 +125,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                                 keyboardType: TextInputType.multiline,
                                                 placeholder: '질문에 대한 답을 작성해주세요.',
                                                 maxLines: 6,
-                                                controller: speech?[index].contentController,
+                                                controller: TextEditingController()
                                               ),
                                             ],
                                           );
@@ -163,13 +167,13 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
       );
   }
 
-  void updateMemo(Memo memo) async {
-    final Database database = await widget.database!;
-    await database
-        .update('memo', memo.toMap(), where: 'id=?', whereArgs: [memo.id]).then((value){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 수정하였습니다.')));
-    });
-  }
+  // void updateMemo(Memo memo) async {
+  //   final Database database = await widget.database!;
+  //   await database
+  //       .update('memo', memo.toMap(), where: 'id=?', whereArgs: [memo.id]).then((value){
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 수정하였습니다.')));
+  //   });
+  // }
 
   // Future<Memo> getMemo() async {
   //   final Database database = await widget.database!;
