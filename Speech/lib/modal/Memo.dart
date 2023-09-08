@@ -6,23 +6,19 @@ class Memo {
   int? id;
   String? title;
   String folderName;
-  List<Speech>? content;
+  List<String?>? speechTitle;
+  List<String?>? speechContent;
   String dateTime;
 
-  Memo(this.id,this.title,this.folderName, this.content, this.dateTime);
+  Memo(this.id,this.title,this.folderName, this.speechTitle, this.speechContent, this.dateTime);
 
   Map<String, dynamic> toMap(){
-    Map<String, dynamic> sp = {};
-
-    for(int i=0; i<content!.length; i++){
-      sp.addAll(content![i].toMap());
-    }
-
     return{
       'id' : id,
       'title' : title,
       'folderName' : folderName,
-      'content' : sp,
+      'speechTitle' : speechTitle,
+      'speechContent' : speechContent,
       'dateTime': dateTime
     };
   }
