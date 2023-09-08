@@ -1,30 +1,35 @@
+import 'dart:collection';
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-
-import '../modal/Folder.dart';
 import '../modal/Memo.dart';
 import '../modal/Speech.dart';
 
 class MemoPage extends StatefulWidget {
-  final Future<Database> database;
+  // final Future<Database> database;
+  FirebaseDatabase? _database;
+  DatabaseReference? reference;
 
-  MemoPage(this.database);
+  MemoPage(this._database, this.reference);
 
   @override
   State<MemoPage> createState() => _MemoPageState();
 }
 
 class _MemoPageState extends State<MemoPage> {
-  TextEditingController? controller;
   TextEditingController? titleController;
   List<Speech>? speech = List.empty(growable: true);
+
+  List<String?>? speechTitle = List.empty(growable: true);
+  List<String?>? speechContent = List.empty(growable: true);
+
 
   @override
   void initState() {
     titleController = TextEditingController();
-    controller = TextEditingController();
     super.initState();
   }
 
@@ -40,11 +45,13 @@ class _MemoPageState extends State<MemoPage> {
         title: Text("메모"),
         actions: [
           TextButton(onPressed: (){
-            print(controller!.value.text);
             DateTime now = DateTime.now();
             String currentTime = DateFormat('yyyy-MM-dd').format(now);
-            Memo memo = Memo(null,titleController!.value.text.toString(),folderName,speech, currentTime);
-            insertMemo(memo);
+            for(Speech item in speech!){
+              speechTitle!.add(item.title);
+            }
+            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, speechTitle, speechContent, currentTime);
+            // insertMemo(memo);
             Navigator.of(context).pop();
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
@@ -79,7 +86,7 @@ class _MemoPageState extends State<MemoPage> {
 
                             CupertinoButton(child: Text('면접 질문 추가'),color: Colors.lightBlue,padding: EdgeInsets.only(left: width/3, right: width/3),onPressed: () {
                               setState(() {
-                                speech?.add(Speech(null, null, TextEditingController(), TextEditingController()));
+                                speech!.add(Speech('면접 질문을 작성해주세요.', '질문에 대한 답을 작성해주세요.', TextEditingController(), TextEditingController()));
                               });
                             }),
 
@@ -107,10 +114,10 @@ class _MemoPageState extends State<MemoPage> {
                                           controller: speech?[index].titleController,
                                           autofocus: true,
                                           keyboardType: TextInputType.multiline,
-                                          prefix: Padding(padding: EdgeInsets.only(left: 10), child: Icon(CupertinoIcons.checkmark_alt),),
-                                          onChanged: (v){
-                                            speech?[index].title = v;
+                                          onChanged: (value){
+                                            speech?[index].title = value;
                                           },
+                                          prefix: Padding(padding: EdgeInsets.only(left: 10), child: Icon(CupertinoIcons.checkmark_alt),),
                                         ),
                                       ),
                                       SizedBox(height: 10),
@@ -123,10 +130,10 @@ class _MemoPageState extends State<MemoPage> {
                                         keyboardType: TextInputType.multiline,
                                         placeholder: '질문에 대한 답을 작성해주세요.',
                                         maxLines: 6,
-                                        controller: speech?[index].contentController,
-                                        onChanged: (v){
-                                          speech?[index].content = v;
+                                        onChanged: (value){
+                                          speech?[index].content = value;
                                         },
+                                        controller: speech?[index].contentController,
                                       ),
                                     ],
                                   );
@@ -168,11 +175,11 @@ class _MemoPageState extends State<MemoPage> {
     );
   }
 
-  void insertMemo(Memo memo) async {
-    final Database database = await widget.database!;
-    await database
-        .insert('memo', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace).then((value){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
-    });
-  }
+  // void insertMemo(Memo memo) async {
+  //   final Database database = await widget.database!;
+  //   await database
+  //       .insert('memo', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace).then((value){
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
+  //   });
+  // }
 }
