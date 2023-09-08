@@ -8,7 +8,7 @@ class Speech{
 
   Speech(this.title, this.content,this.titleController, this.contentController);
 
-  Map<String, String?> toMap(){
+  Map<String?, String?> toMap(){
     return{
       'title' : title,
       'content' : content,
