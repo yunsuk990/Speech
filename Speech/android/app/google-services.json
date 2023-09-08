@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "578875066487",
+    "project_id": "speech-976b8",
+    "storage_bucket": "speech-976b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578875066487:android:7e21b3a4358b552e475e72",
+        "android_client_info": {
+          "package_name": "com.example.speech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "578875066487-9h78ck6j16skdibc4ecjtfdepl39t03v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCngOt8sMpWGaphpx52j2V0LRdrP1bSUsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "578875066487-9h78ck6j16skdibc4ecjtfdepl39t03v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "578875066487-cb7vfghbsq4oo8ovre41lcg2inhstvo1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.speech.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
