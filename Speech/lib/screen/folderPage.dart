@@ -1,13 +1,15 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:intl/intl.dart';
 import '../modal/Memo.dart';
-import '../modal/Speech.dart';
 
 class FolderPage extends StatefulWidget {
-  final Future<Database> database;
-  FolderPage(this.database);
+  // final Future<Database> database;
+
+  FirebaseDatabase? _database;
+  DatabaseReference? reference;
+  FolderPage(this._database, this.reference);
 
   @override
   State<FolderPage> createState() => _FolderPageState();
@@ -29,7 +31,7 @@ class _FolderPageState extends State<FolderPage> {
     double width = size.width;
     double height = size.height;
     String folderName = ModalRoute.of(context)!.settings.arguments as String;
-    memoList = getMemoList(folderName);
+    // memoList = getMemoList(folderName);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +49,7 @@ class _FolderPageState extends State<FolderPage> {
           CupertinoButton(child: Image.asset('images/edit.png', color: Colors.white), onPressed: (){
             Navigator.of(context).pushNamed('/memo', arguments: folderName).then((_){
               setState(() {
-                memoList = getMemoList(folderName);
+                // memoList = getMemoList(folderName);
               });
             });
           })
@@ -86,17 +88,17 @@ class _FolderPageState extends State<FolderPage> {
                                       padding: EdgeInsets.all(10),
                                       child: ListTile(
                                         leading: Text('${folderList[index].title}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                        title:Text(folderList[index].content.toString(), style: TextStyle(fontWeight: FontWeight.w300), maxLines: 1,),
+                                        title:Text("", style: TextStyle(fontWeight: FontWeight.w300), maxLines: 1,),
                                         trailing: Text('${folderList[index].dateTime}'),
                                         onTap: (){
                                           Navigator.of(context).pushNamed('/memoUpdate', arguments: folderList[index]).then((value){
                                             setState(() {
-                                              memoList = getMemoList(folderName);
+                                              // memoList = getMemoList(folderName);
                                             });
                                           });
                                         },
                                         onLongPress: (){
-                                          deleteMemo(folderList[index], folderList[index].folderName);
+                                          // deleteMemo(folderList[index], folderList[index].folderName);
                                         },
                                       ),
                                     )
@@ -118,31 +120,25 @@ class _FolderPageState extends State<FolderPage> {
     );
   }
 
-  Future<List<Memo>> getMemoList(String folderName) async {
-    final Database database = await widget.database!;
-    final List<Map<String, dynamic>> maps = await database.query('memo',
-      where: 'folderName=?', whereArgs: [folderName]
-    );
-
-    return List.generate(maps.length, (index){
-      // List<Speech> speech = maps[index]['content'];
-      // for(int i=0; i<speech.length; i++){
-      //   speech[i].titleController = TextEditingController(text: speech[i].title);
-      //   speech[i].contentController = TextEditingController(text: speech[i].content);
-      // }
-
-      return Memo(maps[index]['id'],maps[index]['title'],maps[index]['folderName'], maps[index]['content'], maps[index]['dateTime']);
-    });
-  }
-
-  void deleteMemo(Memo memo, String folderName) async {
-    final Database database = await widget.database!;
-    await database.delete('memo',
-        where: 'id=?', whereArgs: [memo.id]).then((value){
-      setState(() {
-        memoList = getMemoList(folderName);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 삭제하였습니다.')));
-    });
-  }
+  // Future<List<Memo>> getMemoList(String folderName) async {
+  //   final Database database = await widget.database!;
+  //   final List<Map<String, dynamic>> maps = await database.query('memo',
+  //     where: 'folderName=?', whereArgs: [folderName]
+  //   );
+  //
+  //   return List.generate(maps.length, (index){
+  //     return Memo(maps[index]['id'],maps[index]['title'],maps[index]['folderName'], maps[index]['speechTitle'], maps[index]['speechContent'], maps[index]['dateTime']);
+  //   });
+  // }
+  //
+  // void deleteMemo(Memo memo, String folderName) async {
+  //   final Database database = await widget.database!;
+  //   await database.delete('memo',
+  //       where: 'id=?', whereArgs: [memo.id]).then((value){
+  //     setState(() {
+  //       memoList = getMemoList(folderName);
+  //     });
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 삭제하였습니다.')));
+  //   });
+  // }
 }
