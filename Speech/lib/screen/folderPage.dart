@@ -1,7 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite_common/sqlite_api.dart';
+import '../modal/Folder.dart';
 import '../modal/Memo.dart';
 
 class FolderPage extends StatefulWidget {
@@ -15,10 +15,10 @@ class FolderPage extends StatefulWidget {
   State<FolderPage> createState() => _FolderPageState();
 }
 
-
 class _FolderPageState extends State<FolderPage> {
 
-  Future<List<Memo>>? memoList;
+  late Future<List<Memo>>? memoList;
+  late Folder folder;
 
   @override
   void initState() {
@@ -26,108 +26,131 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     double width = size.width;
     double height = size.height;
-    String folderName = ModalRoute.of(context)!.settings.arguments as String;
-    // memoList = getMemoList(folderName);
+    folder = ModalRoute.of(context)!.settings.arguments as Folder;
+    // memoList = getMemoList(folderName, widget.reference);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(folderName),
-
+        title: Text(folder.name),
         leadingWidth: 120,
         leading: Row(children: <Widget>[
-            IconButton(onPressed: (){
-              Navigator.of(context).pop();
-            }, icon: Icon(CupertinoIcons.back),
-                constraints: BoxConstraints()),
-            Text('폴더', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-          ]),
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Icon(CupertinoIcons.back),
+              constraints: BoxConstraints()),
+          Text('폴더',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+        ]),
         actions: <Widget>[
-          CupertinoButton(child: Image.asset('images/edit.png', color: Colors.white), onPressed: (){
-            Navigator.of(context).pushNamed('/memo', arguments: folderName).then((_){
-              setState(() {
-                // memoList = getMemoList(folderName);
-              });
-            });
-          })
+          CupertinoButton(
+              child: Image.asset('images/edit.png', color: Colors.white),
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamed('/memo', arguments: folder.name)
+                    .then((_) {
+                  setState(() {
+                    // memoList = getMemoList(folderName);
+                  });
+                });
+              })
         ],
       ),
-
       body: Container(
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              Container(
+          child: Center(
+        child: Column(
+          children: <Widget>[
+            Container(
                 width: width,
-                height: height*0.83,
+                height: height * 0.83,
                 child: FutureBuilder(
-                  builder: (context, snapshot){
-                    switch(snapshot.connectionState){
-                      case ConnectionState.none:
-                        return CupertinoActivityIndicator();
-                      case ConnectionState.waiting:
-                        return CupertinoActivityIndicator();
-                      case ConnectionState.active:
-                        return CupertinoActivityIndicator();
-                      case ConnectionState.done:
-                        if(snapshot.hasData){
-                          return ListView.builder(
-                              itemCount: (snapshot.data! as List<Memo>).length,
-                              padding: EdgeInsets.only(top: 10),
-                              itemBuilder: (BuildContext context, int index) {
-                                List<Memo> folderList = snapshot.data as List<Memo>;
-                                return Card(
-                                    elevation: 5,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10),
-                                      child: ListTile(
-                                        leading: Text('${folderList[index].title}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                        title:Text("", style: TextStyle(fontWeight: FontWeight.w300), maxLines: 1,),
-                                        trailing: Text('${folderList[index].dateTime}'),
-                                        onTap: (){
-                                          Navigator.of(context).pushNamed('/memoUpdate', arguments: folderList[index]).then((value){
-                                            setState(() {
-                                              // memoList = getMemoList(folderName);
-                                            });
-                                          });
-                                        },
-                                        onLongPress: (){
-                                          // deleteMemo(folderList[index], folderList[index].folderName);
-                                        },
-                                      ),
-                                    )
-                                );
+                    future: widget.reference?.child("memo").orderByChild("folderName").equalTo(folder.name).once(),
+                    builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                      return CupertinoActivityIndicator();
+                    case ConnectionState.waiting:
+                      return CupertinoActivityIndicator();
+                    case ConnectionState.active:
+                      return CupertinoActivityIndicator();
+                    case ConnectionState.done:
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                            itemCount: snapshot.data?.snapshot.children.length,
+                            padding: EdgeInsets.only(top: 10),
+                            itemBuilder: (BuildContext context, int index) {
+                              List<Memo> folderList = List.empty(growable: true);
+                              for(final child in snapshot.data!.snapshot.children){
+                                folderList.add(Memo.fromSnapshot(child));
                               }
-                          );
-                        }else{
-                          return Text('No Data');
-                        }
-                    }
-                  },
-                  future: memoList,
-                ),
-              ),
-            ],
-          )
+                              return Card(
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: ListTile(
+                                      leading: Text(
+                                          '${folderList[index].title}',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18)),
+                                      title: Text(
+                                        "",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w300),
+                                        maxLines: 1,
+                                      ),
+                                      trailing:
+                                          Text('${folderList[index].dateTime}'),
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .pushNamed('/memoUpdate',
+                                                arguments: folderList[index])
+                                            .then((value) {
+                                          setState(() {
+                                            // memoList = getMemoList(folderName);
+                                          });
+                                        });
+                                      },
+                                      onLongPress: () {
+                                        // deleteMemo(folderList[index], folderList[index].folderName);
+                                      },
+                                    ),
+                                  ));
+                            });
+                      } else {
+                        return Text('No Data');
+                      }
+                  }
+                }))
+          ],
         ),
-      ),
+      )),
     );
   }
 
-  // Future<List<Memo>> getMemoList(String folderName) async {
-  //   final Database database = await widget.database!;
-  //   final List<Map<String, dynamic>> maps = await database.query('memo',
-  //     where: 'folderName=?', whereArgs: [folderName]
-  //   );
-  //
-  //   return List.generate(maps.length, (index){
-  //     return Memo(maps[index]['id'],maps[index]['title'],maps[index]['folderName'], maps[index]['speechTitle'], maps[index]['speechContent'], maps[index]['dateTime']);
+  // Future<List<Memo>> getMemoList(String folderName, DatabaseReference? reference) async {
+  //   reference?.child("memo").orderByChild(folderName).onValue.listen((event) {
+  //       // List<Memo> list = List.empty(growable: true);
+  //       // for (final child in event.snapshot.children) {
+  //       //   list.add(Memo.fromSnapshot(child));
+  //       // }
+  //           return List.generate(event.snapshot.children.length, (index){
+  //             return Memo.fromSnapshot(event.snapshot.children.elementAt(index));
+  //       });
   //   });
   // }
   //
