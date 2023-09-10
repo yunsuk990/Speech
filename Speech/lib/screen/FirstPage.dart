@@ -110,7 +110,7 @@ class _firstPage extends State<FirstPage>{
                                                 trailingIcon: CupertinoIcons.pencil,),
                                             ],
                                             child: CupertinoButton(onPressed: () {
-                                              Navigator.of(context,).pushNamed('/folder', arguments: list?[index].name);
+                                              Navigator.of(context,).pushNamed('/folder', arguments: list?[index]);
                                             }, child: Icon(CupertinoIcons.folder_fill, size: 90),padding: EdgeInsets.zero,
                                             ),
                                           ),
