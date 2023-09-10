@@ -15,6 +15,7 @@ class FirstPage extends StatefulWidget{
 class _firstPage extends State<FirstPage>{
 
   List<Folder>? list = List.empty(growable: true);
+  List<String>? items = List.empty(growable: true);
   bool canTap = false;
 
   @override
@@ -41,23 +42,30 @@ class _firstPage extends State<FirstPage>{
                     size: 30),
                 padding: EdgeInsets.only(right: 10),
                 onPressed: () async {
-                  List<String>? items = List.generate(list!.length, (index){
-                      return list![index].name;
-                    });
+                  FocusScope.of(context).unfocus();
+                  items = List.generate(list!.length, (index){
+                    return list![index].name;
+                  });
                   int index = 0;
                   for(int i=0;i<items!.length; i++){
-                    if(items.contains("무제폴더${i+1}")){
+                    if(items!.contains("무제폴더${i+1}")){
                       index = i+2;
                     }
                   }
                   if(index == 0){
-                    if(items.contains('무제폴더')){
-                      insertFolder(Folder("무제폴더1",null, null, DateTime.now().toIso8601String()), widget.reference);
+                    if(items!.contains('무제폴더')){
+                      Folder folder = Folder(null,"무제폴더1",null, null, DateTime.now().toIso8601String());
+                      folder.id = folder.hashCode.toString();
+                      insertFolder(folder, widget.reference);
                     }else{
-                      insertFolder(Folder("무제폴더",null, null, DateTime.now().toIso8601String()), widget.reference);
+                      Folder folder = Folder(null,"무제폴더",null, null, DateTime.now().toIso8601String());
+                      folder.id = folder.hashCode.toString();
+                      insertFolder(folder, widget.reference);
                     }
                   }else{
-                    insertFolder(Folder("무제폴더${index}",null, null, DateTime.now().toIso8601String()), widget.reference);
+                    Folder folder = Folder(null,"무제폴더${index}",null, null, DateTime.now().toIso8601String());
+                    folder.id = folder.hashCode.toString();
+                    insertFolder(folder, widget.reference);
                   }
                 })
           ],
@@ -108,20 +116,16 @@ class _firstPage extends State<FirstPage>{
                                           ),
                                           TextField(
                                               style: TextStyle(color: Colors.black),
-                                              autofocus: false,
                                               decoration: null,
                                               keyboardType: TextInputType.text,
                                               focusNode: list?[index].focusNode,
                                               textAlign: TextAlign.center,
                                               controller: list?[index].controller,
-                                              onTap: (){
-                                                canTap = true;
-                                              },
+                                              // onChanged: (value){
+                                              //   updateFolder(list![index], value, widget.reference);
+                                              // },
                                               onTapOutside: (v){
-                                                if(canTap){
-                                                  updateFolder(list![index], list![index].controller!.value.text.toString(), widget.reference);
-                                                  canTap = false;
-                                                }
+                                                updateFolder(list![index], list![index].controller!.value.text, widget.reference);
                                               },
                                           ),
                                         ],
@@ -144,7 +148,7 @@ class _firstPage extends State<FirstPage>{
   }
 
   void insertFolder(Folder folder, DatabaseReference? reference) {
-    reference?.child("yunsuk990").child(folder.name).set(folder.toJson())
+    reference?.child("yunsuk990").child(folder.id!).set(folder.toJson())
         .then((_){
           print("success");
           FocusScope.of(context).requestFocus(list?[list!.length-1].focusNode);
@@ -156,20 +160,22 @@ class _firstPage extends State<FirstPage>{
   }
   //
   void getFolderList(DatabaseReference? reference) {
-    reference?.child("yunsuk990").onChildAdded.listen((event) {
+    reference?.child("yunsuk990").onValue.listen((event) {
       if(event.snapshot != null){
+        list?.clear();
         setState(() {
-          list?.add(Folder.fromSnapshot(event.snapshot));
-          print(list);
+          for(final child in event.snapshot.children){
+            list?.add(Folder.fromSnapshot(child));
+          };
+          list?.sort((a,b) => a.name.compareTo(b.name));
         });
       }
     });
   }
   //
   void deleteFolder(Folder folder, DatabaseReference? reference) {
-    reference?.child("yunsuk990").child(folder.name).remove().then((value){
+    reference?.child("yunsuk990").child(folder.id!).remove().then((value){
       setState(() {
-        list?.clear();
         getFolderList(reference);
       });
     });
@@ -185,14 +191,11 @@ class _firstPage extends State<FirstPage>{
   //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('폴더를 삭제하였습니다.')));
   //   });
   // }
-  //
-  void updateFolder(Folder folder, String name, DatabaseReference? reference) {
-      list!.clear();
-      Map<String, dynamic> map = Map();
-      print(folder.name);
-      map[folder.name] = name;
-      reference?.child("yunsuk990").update(map);
-      getFolderList(reference);
 
+  void updateFolder(Folder folder, String name, DatabaseReference? reference) {
+    Map<String,String> map = Map();
+    map['name'] = name;
+    reference?.child("yunsuk990").child(folder.id!).update(map);
+    FocusScope.of(context).unfocus();
   }
 }
