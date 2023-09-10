@@ -51,8 +51,8 @@ class _MemoPageState extends State<MemoPage> {
               speechTitle!.add(item.title);
             }
             Memo memo = Memo(null,titleController!.value.text.toString(),folderName, speechTitle, speechContent, currentTime);
-            // insertMemo(memo);
-            Navigator.of(context).pop();
+            memo.id = memo.hashCode.toString();
+            insertMemo(memo, widget.reference);
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
       ),
@@ -175,11 +175,12 @@ class _MemoPageState extends State<MemoPage> {
     );
   }
 
-  // void insertMemo(Memo memo) async {
-  //   final Database database = await widget.database!;
-  //   await database
-  //       .insert('memo', memo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace).then((value){
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
-  //   });
-  // }
+  void insertMemo(Memo memo, DatabaseReference? reference) async {
+    reference?.child("memo").child(memo.id!).set(memo.toMap()).then((_){
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
+    }).catchError((error){
+
+    });
+  }
 }
