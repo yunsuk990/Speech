@@ -1,9 +1,10 @@
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:speech/modal/Speech.dart';
 
 class Memo {
-  int? id;
+  String? id;
   String? title;
   String folderName;
   List<String?>? speechTitle;
@@ -22,5 +23,13 @@ class Memo {
       'dateTime': dateTime
     };
   }
+
+  Memo.fromSnapshot(DataSnapshot snapshot):
+        id = snapshot.key,
+        title = (snapshot.value as Map)['title'],
+        folderName = (snapshot.value as Map)['folderName'],
+        // speechTitle = (snapshot.value as Map)['speechTitle'],
+        // speechContent = (snapshot.value as Map)['speechContent'],
+        dateTime = (snapshot.value as Map)['dateTime'];
 
 }
