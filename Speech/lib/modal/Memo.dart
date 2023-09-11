@@ -7,8 +7,8 @@ class Memo {
   String? id;
   String? title;
   String folderName;
-  List<String?>? speechTitle;
-  List<String?>? speechContent;
+  List<dynamic?>? speechTitle = List.empty(growable: true);
+  List<dynamic?>? speechContent = List.empty(growable: true);
   String dateTime;
 
   Memo(this.id,this.title,this.folderName, this.speechTitle, this.speechContent, this.dateTime);
@@ -28,8 +28,8 @@ class Memo {
         id = snapshot.key,
         title = (snapshot.value as Map)['title'],
         folderName = (snapshot.value as Map)['folderName'],
-        // speechTitle = (snapshot.value as Map)['speechTitle'],
-        // speechContent = (snapshot.value as Map)['speechContent'],
+        speechTitle = (snapshot.value as Map)['speechTitle'] ,
+        speechContent = (snapshot.value as Map)['speechContent'],
         dateTime = (snapshot.value as Map)['dateTime'];
 
 }
