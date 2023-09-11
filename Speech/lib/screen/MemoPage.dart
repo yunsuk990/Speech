@@ -49,6 +49,7 @@ class _MemoPageState extends State<MemoPage> {
             String currentTime = DateFormat('yyyy-MM-dd').format(now);
             for(Speech item in speech!){
               speechTitle!.add(item.title);
+              speechContent!.add(item.content);
             }
             Memo memo = Memo(null,titleController!.value.text.toString(),folderName, speechTitle, speechContent, currentTime);
             memo.id = memo.hashCode.toString();
