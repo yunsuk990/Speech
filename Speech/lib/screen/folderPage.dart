@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../modal/Folder.dart';
 import '../modal/Memo.dart';
 
@@ -15,10 +16,8 @@ class FolderPage extends StatefulWidget {
 
 class _FolderPageState extends State<FolderPage> {
   late Folder folder;
-  @override
-  void initState() {
-    super.initState();
-  }
+
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -26,6 +25,7 @@ class _FolderPageState extends State<FolderPage> {
     double height = size.height;
     folder = ModalRoute.of(context)!.settings.arguments as Folder;
 
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(folder.name),
@@ -64,7 +64,6 @@ class _FolderPageState extends State<FolderPage> {
                         .onValue,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        print(snapshot.data?.snapshot.value);
                         return ListView.builder(
                             itemCount: snapshot.data?.snapshot.children.length,
                             padding: EdgeInsets.only(top: 10),
@@ -74,6 +73,8 @@ class _FolderPageState extends State<FolderPage> {
                                   in snapshot.data!.snapshot.children) {
                                 memoList.add(Memo.fromSnapshot(child));
                               }
+                              DateTime date = DateTime.parse(memoList[index].dateTime);
+                              String currentTime = DateFormat('yyyy-MM-dd').format(date);
                               return Card(
                                   elevation: 5,
                                   shape: RoundedRectangleBorder(
@@ -88,13 +89,13 @@ class _FolderPageState extends State<FolderPage> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18)),
                                       title: Text(
-                                        "${memoList[index].speechTitle?[0]}",
+                                          memoList[index].speech.isNotEmpty ? "${memoList[index].speech?.keys.elementAt(0)}": "",
                                         style: TextStyle(
                                             fontWeight: FontWeight.w300),
                                         maxLines: 1,
                                       ),
                                       trailing:
-                                          Text('${memoList[index].dateTime}'),
+                                          Text(currentTime),
                                       onTap: () {
                                         Navigator.of(context)
                                             .pushNamed('/memoUpdate',
@@ -108,7 +109,7 @@ class _FolderPageState extends State<FolderPage> {
                                   ));
                             });
                       } else {
-                        return Center(child: Text('No Data'));
+                        return Container();
                       }
                     }))
           ],
