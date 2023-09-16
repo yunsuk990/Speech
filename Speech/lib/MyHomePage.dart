@@ -28,7 +28,7 @@ class _myHomePage extends State<MyHomePage> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
-          children: <Widget>[FirstPage(widget._database, widget.reference), ListPage()],
+          children: <Widget>[FirstPage(widget._database, widget.reference), ListPage(widget._database, widget.reference)],
           controller: controller,
       ),
       bottomNavigationBar:
