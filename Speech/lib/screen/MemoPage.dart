@@ -1,10 +1,7 @@
-import 'dart:collection';
-
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import '../modal/Memo.dart';
 import '../modal/Speech.dart';
 
@@ -25,6 +22,8 @@ class _MemoPageState extends State<MemoPage> {
 
   List<String?>? speechTitle = List.empty(growable: true);
   List<String?>? speechContent = List.empty(growable: true);
+
+  Map<String, String> map = Map();
 
 
   @override
@@ -48,10 +47,11 @@ class _MemoPageState extends State<MemoPage> {
             DateTime now = DateTime.now();
             String currentTime = DateFormat('yyyy-MM-dd').format(now);
             for(Speech item in speech!){
-              speechTitle!.add(item.title);
-              speechContent!.add(item.content);
+              speechTitle!.add(item.titleController?.value.text);
+              speechContent!.add(item.contentController?.value.text);
+              map[item.titleController!.value.text] = item.contentController!.value.text;
             }
-            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, speechTitle, speechContent, currentTime);
+            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, map, now.toString());
             memo.id = memo.hashCode.toString();
             insertMemo(memo, widget.reference);
           }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
@@ -87,7 +87,7 @@ class _MemoPageState extends State<MemoPage> {
 
                             CupertinoButton(child: Text('면접 질문 추가'),color: Colors.lightBlue,padding: EdgeInsets.only(left: width/3, right: width/3),onPressed: () {
                               setState(() {
-                                speech!.add(Speech('면접 질문을 작성해주세요.', '질문에 대한 답을 작성해주세요.', TextEditingController(), TextEditingController()));
+                                speech!.add(Speech(null, null, TextEditingController(), TextEditingController()));
                               });
                             }),
 
@@ -108,32 +108,33 @@ class _MemoPageState extends State<MemoPage> {
                                           borderRadius: BorderRadius.all(Radius.circular(15)),
                                         ),
                                         elevation: 3,
-                                        child: CupertinoTextField(
-                                          decoration: BoxDecoration(),
-                                          padding: EdgeInsets.only(top: 20, left: 5, bottom: 15, right: 5),
-                                          placeholder: "면접 질문을 작성해주세요.",
+                                        child: TextField(
+                                          decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: "면접 질문을 작성해주세요.",
+                                            contentPadding: EdgeInsets.only(top: 20, left: 5, bottom: 15, right: 5),
+                                            prefixIcon: Padding(padding: EdgeInsets.only(top: 5), child: Icon(CupertinoIcons.checkmark_alt, color: Colors.black,),),
+                                          ),
                                           controller: speech?[index].titleController,
                                           autofocus: true,
                                           keyboardType: TextInputType.multiline,
-                                          onChanged: (value){
-                                            speech?[index].title = value;
-                                          },
-                                          prefix: Padding(padding: EdgeInsets.only(left: 10), child: Icon(CupertinoIcons.checkmark_alt),),
+                                          maxLines: null,
                                         ),
                                       ),
                                       SizedBox(height: 10),
-                                      CupertinoTextField(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: Colors.black),
-                                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                                      TextField(
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderSide: BorderSide(width: 1, color: Colors.black),
+                                              borderRadius: BorderRadius.all(Radius.circular(10))),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(width: 1, color: Colors.black),
+                                              borderRadius: BorderRadius.all(Radius.circular(10))),
+                                          hintText: '질문에 대한 답을 작성해주세요.',
                                         ),
-                                        padding: EdgeInsets.only(top: 10, left: 15, bottom: 10),
                                         keyboardType: TextInputType.multiline,
-                                        placeholder: '질문에 대한 답을 작성해주세요.',
-                                        maxLines: 6,
-                                        onChanged: (value){
-                                          speech?[index].content = value;
-                                        },
+                                        maxLines: null,
+                                        minLines: 2,
                                         controller: speech?[index].contentController,
                                       ),
                                     ],
