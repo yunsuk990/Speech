@@ -27,6 +27,7 @@ class _FolderPageState extends State<FolderPage> {
 
     
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(folder.name),
         leadingWidth: 120,
@@ -69,6 +70,7 @@ class _FolderPageState extends State<FolderPage> {
                             padding: EdgeInsets.only(top: 10),
                             itemBuilder: (BuildContext context, int index) {
                               List<Memo> memoList = List.empty(growable: true);
+                              print(snapshot.data?.snapshot.value);
                               for (final child
                                   in snapshot.data!.snapshot.children) {
                                 memoList.add(Memo.fromSnapshot(child));
@@ -89,7 +91,7 @@ class _FolderPageState extends State<FolderPage> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 18)),
                                       title: Text(
-                                          memoList[index].speech.isNotEmpty ? "${memoList[index].speech?.keys.elementAt(0)}": "",
+                                          memoList[index].speech.isNotEmpty ? "${memoList[index].speech[0].title}" :  " ",
                                         style: TextStyle(
                                             fontWeight: FontWeight.w300),
                                         maxLines: 1,
