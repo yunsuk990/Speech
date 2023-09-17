@@ -52,7 +52,7 @@ class _ListPageState extends State<ListPage> {
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18)),
                               title: Text(
-                                memoList[index].speech.isNotEmpty ? "${memoList[index].speech?.keys.elementAt(0)}": "",
+                                memoList[index].speech.isNotEmpty ? "${memoList[index].speech?[index]}": "",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w300),
                                 maxLines: 1,
