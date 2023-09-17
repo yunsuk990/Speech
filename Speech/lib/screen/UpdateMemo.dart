@@ -18,37 +18,34 @@ class UpdateMemoPage extends StatefulWidget {
 }
 
 class _UpdateMemoPage extends State<UpdateMemoPage> {
-  TextEditingController? controller;
   TextEditingController? titleController;
   late Memo memo;
-  List<Speech>? speech = List.empty(growable: true);
-  Map<String, dynamic> map = Map();
+  List<dynamic> map = List.empty(growable: true);
   @override
   void initState() {
+    map.clear();
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    memo = ModalRoute.of(context)!.settings.arguments as Memo;
-    map = memo.speech;
-    if(map.isNotEmpty){
-      for(int i=0; i<map.length; i++){
-        speech?.add(Speech(map.keys.elementAt(i), map.values.elementAt(i), TextEditingController(text: map.keys.elementAt(i)), TextEditingController(text: map.values.elementAt(i))));
-      }
-    }
+    setState(() {
+      memo = ModalRoute.of(context)!.settings.arguments as Memo;
+      map = memo.speech;
+    });
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
+
     Size size = MediaQuery.of(context).size;
     double width = size.width;
     double height = size.height;
     titleController = TextEditingController(text: memo.title);
-    controller = TextEditingController();
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("메모"),
         actions: [
@@ -60,7 +57,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                 updateMemo(widget.reference);
                 Navigator.of(context).pop();
               },
-              child: Text('완료',
+              child: Text('저장',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -94,18 +91,19 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                     padding: EdgeInsets.only(left: width / 3, right: width / 3),
                     onPressed: () {
                       setState(() {
-                        speech?.add(Speech(null, null, TextEditingController(),
+                        map?.add(Speech(null, null, TextEditingController(),
                             TextEditingController()));
                       });
                     }),
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                    width: width,
-                    height: height * 0.6,
-                    child: ListView.separated(
+                Expanded(
+                    child:  ListView.separated(
+                      scrollDirection: Axis.vertical,
                       itemBuilder: (BuildContext context, int index){
+                        print("speech_length: ${map!.length}");
+                        print("index: ${index}");
                         return Column(
                           children: <Widget>[
                             Card(
@@ -118,18 +116,18 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "면접 질문을 작성해주세요.",
-                                  contentPadding: EdgeInsets.only(top: 20, left: 5, bottom: 15, right: 5),
-                                  prefixIcon: Padding(
-                                    padding: EdgeInsets.only(top: 5),
-                                    child: Icon(CupertinoIcons.checkmark_alt, color: Colors.black,)),
+                                  contentPadding: EdgeInsets.only(top: 20, left: 7,bottom: 15, right: 5),
                                   suffixIcon: IconButton(onPressed: (){
                                     setState(() {
-                                      speech?.removeAt(index);
+                                      map?.removeAt(index);
                                     });
                                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('삭제하였습니다')));
                                   }, icon: Icon(CupertinoIcons.delete, color: CupertinoColors.systemRed))
                                 ),
-                                controller: speech?[index].titleController,
+                                onChanged: (v){
+                                  map[index].title = v;
+                                },
+                                controller: map?[index].titleController,
                                 keyboardType: TextInputType.multiline,
                                 maxLines: null,
                               ),
@@ -145,16 +143,18 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                     borderRadius: BorderRadius.all(Radius.circular(10))),
                                 hintText: '질문에 대한 답을 작성해주세요.',
                               ),
-                              // padding: EdgeInsets.only(top: 10, left: 15, bottom: 10),
                               keyboardType: TextInputType.multiline,
                               maxLines: null,
                               minLines: 2,
-                              controller: speech?[index].contentController,
+                              onChanged: (v){
+                                map[index].content = v;
+                              },
+                              controller: map?[index].contentController,
                             ),
+                            SizedBox(height: 8),
                           ],
                         );
-
-                      },itemCount: speech!.length, separatorBuilder: (BuildContext context, int index) { return Divider(); },),)
+                      },itemCount: map!.length, separatorBuilder: (BuildContext context, int index) { return Divider(thickness: 2,); },),)
               ]),
             ),
           ),
@@ -169,7 +169,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                     borderRadius: BorderRadius.all(Radius.circular(20))),
                 color: Colors.lightBlue,
                 padding:
-                    EdgeInsets.only(left: 45, right: 45, top: 15, bottom: 15),
+                EdgeInsets.only(left: width*0.08, right: width*0.08, top: 15, bottom: 15),
                 child: Text(
                   '면접 시작하기',
                   style: TextStyle(
@@ -185,7 +185,7 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                       borderRadius: BorderRadius.all(Radius.circular(20))),
                   color: Colors.grey,
                   padding:
-                      EdgeInsets.only(left: 45, right: 45, top: 15, bottom: 15),
+                  EdgeInsets.only(left: width*0.08, right: width*0.08, top: 15, bottom: 15),
                   child: Text(
                     '면접 설정하기',
                     style: TextStyle(
@@ -196,57 +196,30 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
             ],
           ),
         )
+
       ]),
     );
   }
 
-  // void updateMemo(Memo memo) async {
-  //   final Database database = await widget.database!;
-  //   await database
-  //       .update('memo', memo.toMap(), where: 'id=?', whereArgs: [memo.id]).then((value){
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 수정하였습니다.')));
-  //   });
-  // }
-
-  // Future<List<Speech>?> getMemo(DatabaseReference? reference) async{
-  //   List<dynamic?>? title;
-  //   List<dynamic?>? content;
-  //   await reference?.child("memo").child(memo.id!).onValue.listen((event) {
-  //     title = (event.snapshot.value as Map)['speechTitle'];
-  //     content = (event.snapshot.value as Map)['speechContent'];
-  //   });
-  //   return List.generate(title!.length, (index){
-  //     return Speech(title?[index], content?[index], TextEditingController(), TextEditingController());
-  //   });
-  // }
-
   void updateMemo(DatabaseReference? reference) async {
-    Map<String, dynamic> map = Map();
+
     try{
-      for(int i=0; i<speech!.length; i++){
-        map[speech![i].titleController!.value.text] = speech![i].contentController?.value.text;
+      print("update");
+      List<Object> list = List.empty(growable: true);
+      for(Speech item in map){
+        list.add((item.toMap()));
       }
+
       Map<String, dynamic> updateMap = Map();
       updateMap["title"] = titleController!.value.text.toString();
-      updateMap["speech"] = jsonEncode(map);
+      updateMap["speech"] = list;
       updateMap["dateTime"] = memo.dateTime;
       reference?.child("memo").child(memo.id!).update(updateMap).then((_) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text("메모를 수정하였습니다.")));
       });
     }catch(e){
-
+      print(e);
     }
-    // showCupertinoDialog(context: context, builder: (context) {
-    //   return CupertinoAlertDialog(
-    //     title: Text("asdfasf"),
-    //     content: Text("asdfadf"),
-    //     actions: [
-    //       CupertinoDialogAction(isDefaultAction: true, child: Text("확인"), onPressed: () {
-    //         Navigator.pop(context);
-    //       })
-    //     ],
-    //   );
-    // });
   }
 }
