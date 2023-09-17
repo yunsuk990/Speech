@@ -40,6 +40,7 @@ class _MemoPageState extends State<MemoPage> {
     String folderName = ModalRoute.of(context)!.settings.arguments as String;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("메모"),
         actions: [
@@ -49,12 +50,16 @@ class _MemoPageState extends State<MemoPage> {
             for(Speech item in speech!){
               speechTitle!.add(item.titleController?.value.text);
               speechContent!.add(item.contentController?.value.text);
+              item.title = item.titleController?.value.text;
+              item.content = item.contentController?.value.text;
+
               map[item.titleController!.value.text] = item.contentController!.value.text;
             }
-            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, map, now.toString());
+            print(speech![0].title);
+            Memo memo = Memo(null,titleController!.value.text.toString(),folderName, speech!, now.toString());
             memo.id = memo.hashCode.toString();
             insertMemo(memo, widget.reference);
-          }, child: Text('완료', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
+          }, child: Text('저장', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))
         ],
       ),
 
@@ -95,9 +100,7 @@ class _MemoPageState extends State<MemoPage> {
                               height: 20,
                             ),
 
-                            Container(
-                              width: width,
-                              height: height*0.6,
+                            Expanded(
                               child: ListView.separated(
                                 itemBuilder: (BuildContext context, int index){
                                   return Column(
@@ -146,43 +149,58 @@ class _MemoPageState extends State<MemoPage> {
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                    child: Row(
+                      children: <Widget>[
+                        MaterialButton(
+                          onPressed: () {},
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20))),
+                          color: Colors.lightBlue,
+                          padding:
+                          EdgeInsets.only(left: width*0.08, right: width*0.08, top: 15, bottom: 15),
+                          child: Text(
+                            '면접 시작하기',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(child: Container()),
+                        MaterialButton(
+                            onPressed: () {},
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(20))),
+                            color: Colors.grey,
+                            padding:
+                            EdgeInsets.only(left: width*0.08, right: width*0.08, top: 15, bottom: 15),
+                            child: Text(
+                              '면접 설정하기',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                  )
                 ]
             ),
-            Padding(padding: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-              child: Row(
-                children: <Widget>[
-                  MaterialButton(onPressed: (){},
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20))
-                    ),
-                    color: Colors.lightBlue,
-                    padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
-                    child: Text('면접 시작하기',style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),),
-
-                  Expanded(child: Container()),
-
-                  MaterialButton(onPressed: (){},
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20))
-                      ),
-                      color: Colors.grey,
-                      padding: EdgeInsets.only(left: 45, right: 45, top:15, bottom: 15),
-                      child: Text('면접 설정하기', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)
-
-                  ),
-                ],
-              ),)
           ]
       ),
     );
   }
 
   void insertMemo(Memo memo, DatabaseReference? reference) async {
+    print("insert");
     reference?.child("memo").child(memo.id!).set(memo.toMap()).then((_){
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('메모를 생성하였습니다.')));
     }).catchError((error){
-
+        print("error");
+        print(error.toString());
     });
   }
 }
