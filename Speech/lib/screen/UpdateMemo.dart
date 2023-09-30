@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:intl/intl.dart';
 import 'package:speech/modal/Speech.dart';
 import '../modal/Memo.dart';
@@ -18,9 +19,14 @@ class UpdateMemoPage extends StatefulWidget {
 }
 
 class _UpdateMemoPage extends State<UpdateMemoPage> {
+  final FlutterTts tts = FlutterTts();
   TextEditingController? titleController;
   late Memo memo;
   List<dynamic> map = List.empty(growable: true);
+
+  _UpdateMemoPage(){
+    setting();
+  }
   @override
   void initState() {
     map.clear();
@@ -117,12 +123,20 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
                                   border: InputBorder.none,
                                   hintText: "면접 질문을 작성해주세요.",
                                   contentPadding: EdgeInsets.only(top: 20, left: 7,bottom: 15, right: 5),
-                                  suffixIcon: IconButton(onPressed: (){
-                                    setState(() {
-                                      map?.removeAt(index);
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('삭제하였습니다')));
-                                  }, icon: Icon(CupertinoIcons.delete, color: CupertinoColors.systemRed))
+                                  suffixIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      IconButton(onPressed: () {
+                                        _speak(map[index].title);
+                                      }, icon: Icon(CupertinoIcons.mic, color: CupertinoColors.black,), visualDensity: VisualDensity(horizontal: -4), constraints: BoxConstraints(),padding: EdgeInsets.only(right: 5),),
+                                      IconButton(onPressed: (){
+                                        setState(() {
+                                          map?.removeAt(index);
+                                        });
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('삭제하였습니다')));
+                                      }, icon: Icon(CupertinoIcons.delete, color: CupertinoColors.systemRed), visualDensity: VisualDensity(horizontal: -4), constraints: BoxConstraints(), padding: EdgeInsets.only(right: 8),)
+                                    ],
+                                  )
                                 ),
                                 onChanged: (v){
                                   map[index].title = v;
@@ -221,5 +235,23 @@ class _UpdateMemoPage extends State<UpdateMemoPage> {
     }catch(e){
       print(e);
     }
+  }
+
+  Future _speak(String text) async{
+    var result = await tts.speak(text);
+  }
+
+  Future<void> setting() async {
+    await tts.setSharedInstance(true);
+    await tts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
+        [
+          IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+          IosTextToSpeechAudioCategoryOptions.mixWithOthers
+        ],
+        IosTextToSpeechAudioMode.voicePrompt
+    );
+    await tts.setLanguage('kor');
+    await tts.setSpeechRate(0.4);
   }
 }
